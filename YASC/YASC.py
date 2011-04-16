@@ -3,12 +3,13 @@
 #
 # YASC - YASC is another spacewars clone
 #
-# Version: proper BETA 0.1
+# Version: BETA 0.1
 # Requires: pygame
 # Mon fromage: :/
 #
 # TODO: * Fix wierd initial collision when starting loop
-#       * Background has obviously sum issues, no clue how fix unless bg made sprite also
+#       * Port to LayeredDirty from RenderUpdates
+#       * Make a Game class that will handle game loop
 # ===========================================================================
 
 import pygame
@@ -224,14 +225,13 @@ class Ship(Entity):
         Entity.__init__(self, entity_id, image, position, mass, vector, velocity, turn_value, wall_type, gravity_bit)
         self.missiles = 9
 
-        def Shoot(self):
-            if self.missiles > 0:
-                p_x, p_y = self.Physics.position
-                m_angle = self.Physics.vector[0]
-                v_x, v_y = self.Physics.velocity
-                self.sprite_list.add(Projectile('missile_1b.png', [p_x,p_y], 80.0, [m_angle, 1.0], [v_x,v_y]))
-
-                self.missiles -= 1
+    def Shoot(self):
+        if self.missiles > 0:
+            p_x, p_y = self.position
+            m_angle = self.vector[0]
+            v_x, v_y = self.velocity
+            self.sprite_list.add(Entity(self.entity_id, 'missile_1b.png', [p_x,p_y], 80.0, [m_angle, 1.0], [v_x,v_y], 0, "wrap",2))
+            self.missiles -= 1
 
 class CelestialBody(Entity):
     def __init__(self,
@@ -256,6 +256,7 @@ background = pygame.Surface(screen_size).convert()
 background, backgroundRect = Load_pic('milkyway-2.jpg')
 #background.fill((0, 0, 0))
 screen.blit(background, backgroundRect)
+pygame.display.flip()
 clock = pygame.time.Clock()
 
 player_1 = Ship(1, 'shiptest2.png')
